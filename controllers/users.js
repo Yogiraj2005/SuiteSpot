@@ -1,4 +1,4 @@
-const { User } = require('../models');
+const User = require('../models/user.js');
 const bcrypt = require('bcrypt');
 
 module.exports.renderSignupForm = (req, res) => {
@@ -6,17 +6,17 @@ module.exports.renderSignupForm = (req, res) => {
 };
 
 // Handle new user signup
-module.exports.signup = async (req, res) => {
+module.exports.signup = async (req, res, next) => {
     try {
         const { username, email, password } = req.body;
         
         // Securely hash the user's password before saving it
-        const hashedPassword = await bcrypt.hash(password, 12); // 12 is the "salt rounds"
+        const hashedPassword = await bcrypt.hash(password, 12);
 
         const newUser = await User.create({
             username,
             email,
-            password: hashedPassword // Save the hashed password, not the original
+            password: hashedPassword
         });
 
         // Log the new user in automatically after they sign up
