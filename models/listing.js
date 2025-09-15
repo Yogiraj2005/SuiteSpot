@@ -1,48 +1,39 @@
-const mongoose = require("mongoose");
-const Schema = mongoose.Schema;
-const Review = require("./review.js")
+const { DataTypes } = require('sequelize');
+const sequelize = require('../database');
 
-const listingSchema = new Schema({
+const Listing = sequelize.define('Listing', {
+    id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true
+    },
     title: {
-        type: String,
-        required: true,
+        type: DataTypes.STRING,
+        allowNull: false
     },
-    description: String,
+    description: {
+        type: DataTypes.TEXT,
+        allowNull: false
+    },
     image: {
-        url: String,
-        filename: String,
+        type: DataTypes.STRING,
+        defaultValue: "https://images.unsplash.com/photo-1571896349842-33c89424de2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8aG90ZWxzfGVufDB8fDB8fHww&auto=format&fit=crop&w=800&q=60"
     },
-    price: Number,
-    location: String,
-    country: String,
-    reviews: [
-        {
-            type: Schema.Types.ObjectId,
-            ref: "Review",
-        },
-    ],
-    owner: {
-        type: Schema.Types.ObjectId,
-        ref: "User",
+    price: {
+        type: DataTypes.INTEGER,
+        allowNull: false
     },
-    geometry: {
-        type: {
-            type: String,
-            enum: ["Point"],
-            required: true,
-        },
-        coordinates: {
-            type: [Number],
-            required: true,
-        },
+    location: {
+        type: DataTypes.STRING,
+        allowNull: false
     },
+    country: {
+        type: DataTypes.STRING,
+        allowNull: false
+    }
+}, {
+    tableName: 'listings'
 });
 
-listingSchema.post("findOneAndDelete", async (listing) => {
-    if(listing) {
-        await Review.deleteMany({_id : {$in: listing.reviews}});
-    }
-})
-
-const Listing = mongoose.model("Listing", listingSchema);
 module.exports = Listing;
+
