@@ -30,6 +30,11 @@ const Listing = sequelize.define('Listing', {
     country: {
         type: DataTypes.STRING,
         allowNull: false
+    },
+    // THIS IS THE NEW FIELD to store map coordinates from the Mapbox API
+    geometry: {
+        type: DataTypes.JSON,
+        allowNull: true // It's good practice to allow this to be null
     }
 }, {
     tableName: 'listings'
