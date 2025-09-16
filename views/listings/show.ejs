@@ -5,7 +5,6 @@
     const listing = <%- JSON.stringify(listing) %>;
 </script>
 
-
 <div class="row mt-3">
     <div class="col-8 offset-3">
         <h3><%= listing.title %></h3>
@@ -22,7 +21,6 @@
         </div>
     </div>
     
-    
     <% if(currUser && listing.owner.id === currUser.id) { %>
         <div class="btns">
             <a href="/listings/<%= listing.id %>/edit" class="btn btn-dark col-1 offset-3 edit-btn">Edit</a>
@@ -32,13 +30,41 @@
         </div>
     <% } %>
     
+    <!-- ================================================================= -->
+    <!-- UPDATED BOOKING UI SECTION WITH DATE PICKERS -->
+    <!-- ================================================================= -->
+    <div class="col-6 offset-3 mb-3">
+        <hr>
+        <!-- THIS IS THE FIX: Changed currUser..id to currUser.id -->
+        <% if (currUser && currUser.id !== listing.owner.id) { %>
+            <% if (currentBooking) { %>
+                <div class="alert alert-warning" role="alert">
+                    This property is currently booked from <%= new Date(currentBooking.startDate).toLocaleDateString() %> to <%= new Date(currentBooking.endDate).toLocaleDateString() %>.
+                </div>
+            <% } else { %>
+                <h4>Book this Property</h4>
+                <form method="POST" action="/listings/<%= listing.id %>/book" class="needs-validation" novalidate>
+                    <div class="mb-3">
+                        <label for="startDate" class="form-label">Start Date</label>
+                        <input type="date" id="startDate" name="booking[startDate]" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="endDate" class="form-label">End Date</label>
+                        <input type="date" id="endDate" name="booking[endDate]" class="form-control" required>
+                    </div>
+                    <button class="btn btn-success">Book Now</button>
+                </form>
+            <% } %>
+        <% } %>
+    </div>
+    <!-- ================================================================= -->
 
+    <!-- Review section -->
     <div class="col-8 offset-3 mb-3">
         <% if(currUser) { %>
             <hr>
             <h4>Leave a Review</h4>
             <form action="/listings/<%= listing.id %>/reviews" method="POST" novalidate class="needs-validation">
-                <!-- Review Form Content... -->
                 <div class="mb-3 mt-3">
                     <label for="rating" class="form-label">Rating</label>
                     <fieldset class="starability-slot">
@@ -58,9 +84,6 @@
                 <div class="mb-3 mt-3">
                     <label for="comment" class="form-label">Comments</label>
                     <textarea name="review[comment]" id="comment" cols="30" rows="5" class="form-control" required></textarea>
-                    <div class="invalid-feedback">
-                        Please add some comments for review
-                    </div>
                 </div>
                 <button class="btn btn-outline-dark">Submit</button>
             </form>
@@ -70,7 +93,6 @@
         <% if(listing.Reviews && listing.Reviews.length > 0) { %>
             <p><b>All Reviews</b></p>
             <div class="row">
-                <!-- THIS IS THE FIX: Changed listing.reviews to listing.Reviews -->
                 <% for(review of listing.Reviews) { %>
                     <div class="card col-5 ms-3 mb-3">
                         <div class="card-body">
@@ -89,6 +111,7 @@
         <% } %>
     </div>
     
+    <!-- Map section -->
     <div class="col-8 offset-3 mb-3">
         <h4>Where you'll be</h4>
         <div id="map"></div>
