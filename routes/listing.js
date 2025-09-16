@@ -3,7 +3,7 @@ const router = express.Router();
 const wrapAsync = require("../utils/wrapAsync.js");
 const { isLoggedIn, isOwner, validateListing } = require("../middleware.js");
 const listingController = require("../controllers/listings.js");
-const bookingController = require("../controllers/bookings.js"); // 1. Import the bookings controller
+const bookingController = require("../controllers/bookings.js");
 const { storage } = require("../cloudConfig.js");
 const multer = require('multer');
 const upload = multer({ storage });
@@ -22,6 +22,13 @@ router
 // Route to show the "new listing" form
 router.get("/new", isLoggedIn, listingController.renderNewForm);
 
+// --- THIS IS THE NEW ROUTE ---
+// NOTE: This route must come BEFORE the "/:id" route to work correctly
+router.get("/my-listings", isLoggedIn, wrapAsync(listingController.showMyListings));
+
+// Route for booking a specific listing
+router.post("/:id/book", isLoggedIn, wrapAsync(bookingController.createBooking));
+
 // Routes for showing, updating, and deleting a specific listing
 router
     .route("/:id")
@@ -37,10 +44,6 @@ router
 
 // Route to show the "edit listing" form
 router.get("/:id/edit", isLoggedIn, isOwner, wrapAsync(listingController.renderEditForm));
-
-// --- THIS IS THE NEW BOOKING ROUTE ---
-// 2. This route listens for the form submission from the "Book Now" button
-router.post("/:id/book", isLoggedIn, wrapAsync(bookingController.createBooking));
 
 module.exports = router;
 

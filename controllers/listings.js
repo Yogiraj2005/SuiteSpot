@@ -80,6 +80,15 @@ module.exports = {
         await Listing.destroy({ where: { id: id } });
         req.flash("success", "Listing Deleted!");
         res.redirect("/listings");
+    },
+
+
+     showMyListings: async (req, res) => {
+        // Find all listings where the ownerId matches the logged-in user's ID
+        const myListings = await Listing.findAll({
+            where: { ownerId: req.user.id }
+        });
+        res.render("listings/my-listings.ejs", { myListings });
     }
 };
 
