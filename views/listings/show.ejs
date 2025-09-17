@@ -47,7 +47,7 @@
             </div>
         <% } else { %>
             <!-- If the listing IS NOT booked... -->
-             <% if (currUser && currUser.id !== listing.owner.id) { %>
+             <% if (currUser && currUser.id !== listing.owner.id ) { %>
                 <!-- ...and the current user is not the owner, show the booking form -->
                 <h4>Book this Property</h4>
                 <form method="POST" action="/listings/<%= listing.id %>/book" class="needs-validation" novalidate>
