@@ -21,7 +21,6 @@ module.exports = {
     // THIS IS THE UPDATED FUNCTION
     showListing: async (req, res) => {
         let { id } = req.params;
-        // 1. Find the listing details
         const listing = await Listing.findByPk(id, {
             include: [
                 { model: Review, include: { model: User, as: 'author' } },
@@ -34,10 +33,12 @@ module.exports = {
             return res.redirect("/listings");
         }
 
-        // 2. NEW: Check if a booking exists for this specific listing
-        const currentBooking = await Booking.findOne({ where: { listingId: id } });
+        // NEW: When finding the booking, also "include" the User model associated with it as the "guest"
+        const currentBooking = await Booking.findOne({ 
+            where: { listingId: id },
+            include: { model: User, as: 'guest' } // This fetches the guest's details!
+        });
         
-        // 3. Pass BOTH the listing and the booking status to the template
         res.render("listings/show.ejs", { listing, currentBooking });
     },
 

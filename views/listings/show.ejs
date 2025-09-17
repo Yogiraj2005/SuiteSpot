@@ -31,17 +31,24 @@
     <% } %>
     
     <!-- ================================================================= -->
-    <!-- UPDATED BOOKING UI SECTION WITH DATE PICKERS -->
+    <!-- UPDATED BOOKING UI SECTION -->
     <!-- ================================================================= -->
     <div class="col-6 offset-3 mb-3">
         <hr>
-        <!-- THIS IS THE FIX: Changed currUser..id to currUser.id -->
-        <% if (currUser && currUser.id !== listing.owner.id) { %>
-            <% if (currentBooking) { %>
-                <div class="alert alert-warning" role="alert">
-                    This property is currently booked from <%= new Date(currentBooking.startDate).toLocaleDateString() %> to <%= new Date(currentBooking.endDate).toLocaleDateString() %>.
-                </div>
-            <% } else { %>
+        <% if (currentBooking) { %>
+            <!-- If the listing IS booked, show a message -->
+            <div class="alert alert-warning" role="alert">
+                This property is currently booked from <b><%= new Date(currentBooking.startDate).toLocaleDateString() %></b> to <b><%= new Date(currentBooking.endDate).toLocaleDateString() %>.</b>
+                
+                <!-- THIS IS THE NEW PART: Show guest info only to the owner -->
+                <% if (currUser && currUser.id === listing.owner.id) { %>
+                    <br>Booked by: <b><%= currentBooking.guest.username %></b>
+                <% } %>
+            </div>
+        <% } else { %>
+            <!-- If the listing IS NOT booked... -->
+             <% if (currUser && currUser.id !== listing.owner.id) { %>
+                <!-- ...and the current user is not the owner, show the booking form -->
                 <h4>Book this Property</h4>
                 <form method="POST" action="/listings/<%= listing.id %>/book" class="needs-validation" novalidate>
                     <div class="mb-3">
@@ -54,14 +61,14 @@
                     </div>
                     <button class="btn btn-success">Book Now</button>
                 </form>
-            <% } %>
+             <% } %>
         <% } %>
     </div>
     <!-- ================================================================= -->
 
     <!-- Review section -->
     <div class="col-8 offset-3 mb-3">
-        <% if(currUser) { %>
+        <% if(currUser && currUser.id !== listing.owner.id) { %>
             <hr>
             <h4>Leave a Review</h4>
             <form action="/listings/<%= listing.id %>/reviews" method="POST" novalidate class="needs-validation">
