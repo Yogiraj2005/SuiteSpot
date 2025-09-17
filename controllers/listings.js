@@ -1,5 +1,6 @@
 // Import Sequelize models, including the new Booking model
 const User = require('../models/user.js');
+const { Op } = require('sequelize'); 
 const Listing = require('../models/listing.js');
 const Review = require('../models/review.js');
 const Booking = require('../models/booking.js');
@@ -90,6 +91,24 @@ module.exports = {
             where: { ownerId: req.user.id }
         });
         res.render("listings/my-listings.ejs", { myListings });
+    },
+
+    searchListings: async (req, res) => {
+        const { q } = req.query; // Get the search query from the URL (e.g., /search?q=goa)
+        
+        console.log("Searching for:", q);
+        // Find all listings where the title, location, or country is LIKE the search query
+        const searchResults = await Listing.findAll({
+            where: {
+                [Op.or]: [
+                    { title: { [Op.like]: `%${q}%` } },
+                    { location: { [Op.like]: `%${q}%` } },
+                    { country: { [Op.like]: `%${q}%` } }
+                ]
+            }
+        });
+        
+        res.render("listings/search-results.ejs", { listings: searchResults, query: q });
     }
 };
 

@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require("express");
 const app = express();
+// ... (all other require statements are the same)
 const path = require("path");
 const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
@@ -13,6 +14,7 @@ const bcrypt = require('bcrypt');
 const cron = require('node-cron');
 const { Op } = require('sequelize');
 
+
 // --- DATABASE & MODELS ---
 const sequelize = require('./database.js');
 const User = require('./models/user.js');
@@ -22,6 +24,7 @@ const Booking = require('./models/booking.js');
 
 // --- DEFINE RELATIONSHIPS ---
 User.hasMany(Listing, { foreignKey: 'ownerId', onDelete: 'CASCADE' });
+// ... (rest of the relationships are the same)
 Listing.belongsTo(User, { as: 'owner', foreignKey: 'ownerId' });
 Listing.hasMany(Review, { foreignKey: 'listingId', onDelete: 'CASCADE' });
 Review.belongsTo(Listing, { foreignKey: 'listingId' });
@@ -32,56 +35,75 @@ Booking.belongsTo(User, { as: 'guest', foreignKey: 'guestId' });
 Listing.hasMany(Booking, { foreignKey: 'listingId', onDelete: 'CASCADE' });
 Booking.belongsTo(Listing, { foreignKey: 'listingId' });
 
+
 // --- SYNC DATABASE ---
 async function syncDatabase() {
+// ... (sync function is the same)
   try {
     await sequelize.sync({ alter: true }); 
-    // await sequelize.sync({ force: true });
-    console.log(' Database synchronized successfully.');
+    console.log('✅ Database synchronized successfully.');
   } catch (error) {
-    console.error(' Error synchronizing the database:', error);
+    console.error('❌ Error synchronizing the database:', error);
   }
 }
 syncDatabase();
 
+
 // --- SCHEDULED TASK FOR BOOKING CLEANUP ---
 cron.schedule('* * * * *', async () => {
-    console.log('Running a task every minute to check for expired bookings...');
+// ... (cron job is the same)
+    console.log('🕒 Running task to check for past bookings...');
     try {
         const result = await Booking.destroy({
-            where: {
-                expiresAt: { [Op.lt]: new Date() }
-            }
+            where: { endDate: { [Op.lt]: new Date() } }
         });
         if (result > 0) {
-            console.log(`🧹 Cleaned up ${result} expired booking(s).`);
+            console.log(`🧹 Cleaned up ${result} past booking(s).`);
         }
     } catch (error) {
-        console.error('Error during expired booking cleanup:', error);
+        console.error('Error during booking cleanup:', error);
     }
 });
 
+
 // --- ROUTE IMPORTS ---
 const listingRouter = require("./routes/listing.js");
+// ... (all other route imports are the same)
 const reviewRouter = require("./routes/review.js");
 const userRouter = require("./routes/user.js");
-const bookingRouter = require("./routes/booking.js"); // <-- ADD THIS LINE
+const bookingRouter = require("./routes/booking.js");
+const searchRouter = require("./routes/search.js");
+
 
 // --- MIDDLEWARE & VIEW ENGINE SETUP ---
 app.set("view engine", "ejs");
+// ... (rest of middleware is the same)
 app.set("views", path.join(__dirname, "views"));
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
 app.engine('ejs', ejsMate);
 app.use(express.static(path.join(__dirname, "/public")));
 
+
+// =================================================================
+// NEW DEBUGGING MIDDLEWARE
+// This will run for EVERY request and log its method and URL
+app.use((req, res, next) => {
+    console.log(`Received a ${req.method} request for: ${req.originalUrl}`);
+    next(); // Pass the request to the next function
+});
+// =================================================================
+
 const sessionOptions = {
+// ... (session options are the same)
     secret: "mysupersecretcode",
     resave: false,
     saveUninitialized: true,
     cookie: { expires: Date.now() + 7 * 24 * 60 * 60 * 1000, maxAge: 7 * 24 * 60 * 60 * 1000, httpOnly: true },
 };
+
 app.use(session(sessionOptions));
+// ... (rest of the file is the same)
 app.use(flash());
 
 // --- PASSPORT.JS AUTHENTICATION CONFIGURATION ---
@@ -112,11 +134,12 @@ app.use((req, res, next) => {
     next();
 });
 
-// --- ROUTE HANDLERS ---
+// --- ROUTE HANDLERS (REORDERED FOR CORRECTNESS) ---
+app.use("/", searchRouter); // Check for search routes first
 app.use("/listings", listingRouter);
 app.use("/listings/:id/reviews", reviewRouter);
 app.use("/", userRouter);
-app.use("/", bookingRouter); // <-- ADD THIS LINE
+app.use("/", bookingRouter);
 
 // --- ERROR HANDLING ---
 app.all("*", (req, res, next) => { next(new ExpressError(404, "Page Not Found!")); });
