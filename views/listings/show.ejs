@@ -6,18 +6,39 @@
 </script>
 
 <div class="row mt-3">
-    <div class="col-8 offset-3">
+    <div class="col-8 offset-2">
         <h3><%= listing.title %></h3>
     </div>
     
     <div class="card col-6 offset-3 show-card listing-card">
-        <img src="<%= listing.image %>" class="card-img-top show-img" alt="listing_image">
+        <!-- IMAGE CAROUSEL FOR MULTIPLE IMAGES -->
+        <div id="listingImageCarousel" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-inner">
+                <% if (listing.image && listing.image.length > 0) { %>
+                    <% listing.image.forEach((imgUrl, index) => { %>
+                        <div class="carousel-item <%= index === 0 ? 'active' : '' %>">
+                            <img src="<%= imgUrl %>" class="d-block w-100 show-img" alt="Listing image <%= index + 1 %>">
+                        </div>
+                    <% }); %>
+                <% } %>
+            </div>
+            <% if (listing.image && listing.image.length > 1) { %>
+                <button class="carousel-control-prev" type="button" data-bs-target="#listingImageCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#listingImageCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Next</span>
+                </button>
+            <% } %>
+        </div>
+
         <div class="card-body">
             <p class="card-text">Owned by <i><%= listing.owner.username %></i></p>
             <p class="card-text"><%= listing.description %></p>
-            <p class="card-text">&#8377; <%= listing.price.toLocaleString("en-IN") %></p>
-            <p class="card-text"><%= listing.location %></p>
-            <p class="card-text"><%= listing.country %></p>
+            <p class="card-text">&#8377; <%= listing.price.toLocaleString("en-IN") %> / person per night</p>
+            <p class="card-text"><%= listing.location %>, <%= listing.country %></p>
         </div>
     </div>
     
@@ -29,26 +50,39 @@
             </form>
         </div>
     <% } %>
-    
-    <!-- ================================================================= -->
-    <!-- UPDATED BOOKING UI SECTION -->
-    <!-- ================================================================= -->
+
     <div class="col-6 offset-3 mb-3">
         <hr>
-        <% if (currentBooking) { %>
-            <!-- If the listing IS booked, show a message -->
+        <h4>Property Details</h4>
+        <ul>
+            <li>Accommodates up to: <b><%= listing.capacity %> people</b></li>
+            <% if(listing.festival_focus) { %>
+                <li>Special for: <b><%= listing.festival_focus %></b></li>
+            <% } %>
+        </ul>
+
+        <% if(listing.nearby_locations && listing.nearby_locations.length > 0) { %>
+            <h5>Nearby Key Locations:</h5>
+            <ul>
+                <% for(let loc of listing.nearby_locations) { %>
+                    <li><%= loc.name %> - <b><%= loc.distance %> km away</b></li>
+                <% } %>
+            </ul>
+        <% } %>
+    </div>
+    
+    <!-- Booking UI Section -->
+    <div class="col-6 offset-3 mb-3">
+       <% if (currentBooking) { %>
             <div class="alert alert-warning" role="alert">
                 This property is currently booked from <b><%= new Date(currentBooking.startDate).toLocaleDateString() %></b> to <b><%= new Date(currentBooking.endDate).toLocaleDateString() %>.</b>
-                
-                <!-- THIS IS THE NEW PART: Show guest info only to the owner -->
                 <% if (currUser && currUser.id === listing.owner.id) { %>
                     <br>Booked by: <b><%= currentBooking.guest.username %></b>
                 <% } %>
             </div>
         <% } else { %>
-            <!-- If the listing IS NOT booked... -->
-             <% if (currUser && currUser.id !== listing.owner.id ) { %>
-                <!-- ...and the current user is not the owner, show the booking form -->
+            <% if (currUser && currUser.id !== listing.owner.id) { %>
+                <hr>
                 <h4>Book this Property</h4>
                 <form method="POST" action="/listings/<%= listing.id %>/book" class="needs-validation" novalidate>
                     <div class="mb-3">
@@ -61,12 +95,11 @@
                     </div>
                     <button class="btn btn-success">Book Now</button>
                 </form>
-             <% } %>
+            <% } %>
         <% } %>
     </div>
-    <!-- ================================================================= -->
 
-    <!-- Review section -->
+    <!-- Review section with corrected logic -->
     <div class="col-8 offset-3 mb-3">
         <% if(currUser && currUser.id !== listing.owner.id) { %>
             <hr>
@@ -118,7 +151,6 @@
         <% } %>
     </div>
     
-    <!-- Map section -->
     <div class="col-8 offset-3 mb-3">
         <h4>Where you'll be</h4>
         <div id="map"></div>

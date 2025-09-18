@@ -3,7 +3,6 @@
 <div class="row mt-3">
     <div class="col-8 offset-2">
         <h3>Search Results for "<%= query %>"</h3>
-
         <% if (listings && listings.length > 0) { %>
             <p><%= listings.length %> listing(s) found.</p>
         <% } else { %>
@@ -17,15 +16,22 @@
     <% for(let listing of listings) { %>
         <a href="/listings/<%= listing.id %>" class="listing-link">
             <div class="card col listing-card">
-                <img src="<%= listing.image %>" class="card-img-top" alt="listing_image" style="height: 20rem;">
+                <!-- FIX: Display the first image from the array -->
+                <% if (listing.image && listing.image.length > 0) { %>
+                    <img src="<%= listing.image[0] %>" class="card-img-top" alt="listing_image" style="height: 20rem;">
+                <% } else { %>
+                    <!-- Fallback in case there are no images -->
+                    <img src="https://placehold.co/600x400/EEE/31343C?text=No+Image" class="card-img-top" alt="listing_image" style="height: 20rem;">
+                <% } %>
                 <div class="card-img-overlay"></div>
                 <div class="card-body">
                     <p class="card-text">
                         <b><%= listing.title %></b> <br>
-                        &#8377; <%= listing.price.toLocaleString("en-IN") %> / night
+                        &#8377; <%= listing.price.toLocaleString("en-IN") %> / person per night
                     </p>
                 </div>
             </div>
         </a>
     <% } %>
 </div>
+

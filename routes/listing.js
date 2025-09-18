@@ -8,41 +8,38 @@ const { storage } = require("../cloudConfig.js");
 const multer = require('multer');
 const upload = multer({ storage });
 
-// Routes for getting all listings and creating a new one
 router
     .route("/")
     .get(wrapAsync(listingController.index))
     .post(
         isLoggedIn, 
-        upload.single('listing[image]'),
+        upload.array('listing[image]', 5), // <-- THIS IS THE CHANGE (accept up to 5 images)
         validateListing, 
         wrapAsync(listingController.createListing)
     );
     
-// Route to show the "new listing" form
+// New Route
 router.get("/new", isLoggedIn, listingController.renderNewForm);
 
-// --- THIS IS THE NEW ROUTE ---
-// NOTE: This route must come BEFORE the "/:id" route to work correctly
+// My Listings Route
 router.get("/my-listings", isLoggedIn, wrapAsync(listingController.showMyListings));
 
-// Route for booking a specific listing
+// Booking Route
 router.post("/:id/book", isLoggedIn, wrapAsync(bookingController.createBooking));
 
-// Routes for showing, updating, and deleting a specific listing
 router
     .route("/:id")
     .get(wrapAsync(listingController.showListing))
     .put(
         isLoggedIn, 
         isOwner, 
-        upload.single('listing[image]'),
+        upload.array('listing[image]', 5), // <-- THIS IS THE CHANGE
         validateListing, 
         wrapAsync(listingController.updateListing)
     )
     .delete(isLoggedIn, isOwner, wrapAsync(listingController.destroyListing));
 
-// Route to show the "edit listing" form
+// Edit Route
 router.get("/:id/edit", isLoggedIn, isOwner, wrapAsync(listingController.renderEditForm));
 
 module.exports = router;

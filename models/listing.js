@@ -16,8 +16,8 @@ const Listing = sequelize.define('Listing', {
         allowNull: false
     },
     image: {
-        type: DataTypes.STRING,
-        defaultValue: "https://images.unsplash.com/photo-1571896349842-33c89424de2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8aG90ZWxzfGVufDB8fDB8fHww&auto=format&fit=crop&w=800&q=60"
+        type: DataTypes.JSON, 
+        allowNull: true
     },
     price: {
         type: DataTypes.INTEGER,
@@ -31,11 +31,28 @@ const Listing = sequelize.define('Listing', {
         type: DataTypes.STRING,
         allowNull: false
     },
-    // THIS IS THE NEW FIELD to store map coordinates from the Mapbox API
     geometry: {
         type: DataTypes.JSON,
-        allowNull: true // It's good practice to allow this to be null
+        allowNull: true
+    },
+    capacity: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 1
+    },
+    festival_focus: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    
+    // --- THIS IS THE NEW, FLEXIBLE FIELD ---
+    // It will store data like: 
+    // [{ name: "Nashik Road Station", distance: 5 }, { name: "Trimbakeshwar", distance: 20 }]
+    nearby_locations: {
+        type: DataTypes.JSON,
+        allowNull: true
     }
+
 }, {
     tableName: 'listings'
 });

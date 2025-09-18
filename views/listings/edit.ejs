@@ -2,52 +2,82 @@
 <div class="row mt-3">
     <div class="col-8 offset-2">
         <h3>Edit your Listing</h3>
-        <!-- FIX: Form action now uses listing.id -->
         <form method="POST" action="/listings/<%= listing.id %>?_method=PUT" novalidate class="needs-validation" enctype="multipart/form-data">
+            
             <div class="mb-3">
                 <label for="title" class="form-label">Title</label>
                 <input name="listing[title]" value="<%= listing.title %>" type="text" class="form-control" required>
-                <div class="valid-feedback">Title looks good!</div>
             </div>
             
             <div class="mb-3">
                 <label for="description" class="form-label">Description</label>
                 <textarea name="listing[description]" class="form-control" required><%= listing.description %></textarea>
-                <div class="invalid-feedback">Please enter a short description</div>
             </div>
 
             <div class="mb-3">
-                Original Listing Image <br>
-                <!-- FIX: Changed listing.image.url to listing.image -->
-                <img src="<%= listing.image %>" style="height: 150px; width: auto;"/>
+                <p><b>Original Images</b></p>
+                <div class="row">
+                    <% if (listing.image && listing.image.length > 0) { %>
+                        <% listing.image.forEach(imgUrl => { %>
+                            <div class="col-3">
+                                <img src="<%= imgUrl %>" class="img-fluid" alt="listing image">
+                            </div>
+                        <% }); %>
+                    <% } %>
+                </div>
             </div>
 
             <div class="mb-3">
-                <label for="image" class="form-label">Upload New Image</label>
-                <input name="listing[image]" type="file" class="form-control">
+                <label for="image" class="form-label">Upload New Images (this will replace old ones)</label>
+                <input name="listing[image]" type="file" class="form-control" multiple>
             </div>
 
             <div class="row">
                 <div class="mb-3 col-md-4">
-                    <label for="price" class="form-label">Price</label>
+                    <label for="price" class="form-label">Price (per person / night)</label>
                     <input name="listing[price]" value="<%= listing.price %>" type="number" class="form-control" required>
-                    <div class="invalid-feedback">Price should be a valid number</div>
                 </div>
-    
                 <div class="mb-3 col-md-8">
                     <label for="country" class="form-label">Country</label>
                     <input name="listing[country]" value="<%= listing.country %>" type="text" class="form-control" required>
-                    <div class="invalid-feedback">Country name should be valid</div>
                 </div>
             </div>
             
             <div class="mb-3">
                 <label for="location" class="form-label">Location</label>
                 <input name="listing[location]" value="<%= listing.location %>" type="text" class="form-control" required>
-                <div class="invalid-feedback">Location should be valid</div>
             </div>
 
-            <button class="btn btn-dark edit-btn mt-3">Update</button>
+            <hr>
+            <h4>Pilgrim-Specific Details</h4>
+
+            <div class="row">
+                <div class="mb-3 col-md-6">
+                    <label for="capacity" class="form-label">Total Capacity (persons)</label>
+                    <input name="listing[capacity]" value="<%= listing.capacity %>" type="number" class="form-control" required>
+                </div>
+                <div class="mb-3 col-md-6">
+                    <label for="festival_focus" class="form-label">Special Festival (optional)</label>
+                    <input name="listing[festival_focus]" value="<%= listing.festival_focus || '' %>" type="text" class="form-control">
+                </div>
+            </div>
+
+            <p>Nearby Key Locations (optional)</p>
+            <% for(let i = 0; i < 4; i++) { %>
+                <div class="row mb-3">
+                    <div class="col-8">
+                        <% if (i === 0) { %><label class="form-label">Location Name</label><% } %>
+                        <input name="nearby_locations[<%= i %>][name]" value="<%= (listing.nearby_locations && listing.nearby_locations[i]) ? listing.nearby_locations[i].name : '' %>" type="text" class="form-control">
+                    </div>
+                    <div class="col-4">
+                        <% if (i === 0) { %><label class="form-label">Distance (km)</label><% } %>
+                        <input name="nearby_locations[<%= i %>][distance]" value="<%= (listing.nearby_locations && listing.nearby_locations[i]) ? listing.nearby_locations[i].distance : '' %>" type="number" step="0.1" class="form-control">
+                    </div>
+                </div>
+            <% } %>
+
+            <button class="btn btn-dark edit-btn mt-3">Update Listing</button>
         </form>
     </div>
 </div>
+
